@@ -1,16 +1,29 @@
 package com.example.takingaphoto;
 
+import java.io.File;
+
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
+	
+	
+
+	private File imageFile;
+	private static final int PHOTO_TAKEN = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -26,13 +39,33 @@ public class MainActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
+				
+				File pictureDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+				imageFile = new File(pictureDirectory, "passpoints_iamge");
+				
 				Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-				startActivity(i);
+				
+				i.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(imageFile));
+				startActivityForResult(i, PHOTO_TAKEN);
 				
 			}
 		} );
 		
 	}
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if(requestCode == PHOTO_TAKEN){
+			Bitmap photo =BitmapFactory.decodeFile(imageFile.getAbsolutePath());
+			
+			if(photo != null){
+				ImageView imageView = (ImageView)findViewById(R.id.view);
+				imageView.setImageBitmap(photo);
+			}else {
+				Toast.makeText(this, R.string.unable_to_save_photo_file_, Toast.LENGTH_LONG).show();
+			}
+		}
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
